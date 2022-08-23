@@ -1,15 +1,18 @@
 package main
 
-import (	
+import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log" 
+	"log"
 )
 
 var config = NewConfig()
 
 type Config struct {
-	Token      string   `yaml:"token"`
+	Debug  bool   `yaml:"debug"`
+	Token  string `yaml:"token"`
+	Folder string `yaml:"folder"`
+	Port   string `yaml:"port"`
 }
 
 func NewConfig() *Config {

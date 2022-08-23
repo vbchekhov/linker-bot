@@ -1,0 +1,7 @@
+/.vscode/
+/posts/
+/app.yaml
+
+__*
+*.exec
+*.exe

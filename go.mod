@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/gorilla/mux v1.8.0
 	github.com/vbchekhov/skeleton v0.0.0-20201116185019-7c95220e1b43
 	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 )

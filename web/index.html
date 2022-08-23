@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👾 L I N K E R B O T</title>
+    <link rel="shortcut icon" href="/static/icon.jpeg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    {{ template "webapp" . }}
+    <style>
+        .card {
+            margin: 15px;
+            padding: 15px;
+        }
+
+        #photos {
+            /* Prevent vertical gaps */
+            line-height: 0;
+
+            -webkit-column-count: 5;
+            -webkit-column-gap: 0px;
+            -moz-column-count: 5;
+            -moz-column-gap: 0px;
+            column-count: 5;
+            column-gap: 0px;
+        }
+
+        #photos img {
+            /* Just in case there are inline attributes */
+            padding: 7px;
+            margin: 7px;
+            border-radius: 12px;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        #photos video {
+            /* Just in case there are inline attributes */
+            padding: 7px;
+            margin: 7px;
+            border-radius: 12px;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        @media (max-width: 1200px) {
+            #photos {
+                -moz-column-count: 4;
+                -webkit-column-count: 4;
+                column-count: 4;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            #photos {
+                -moz-column-count: 3;
+                -webkit-column-count: 3;
+                column-count: 3;
+            }
+        }
+
+        @media (max-width: 800px) {
+            #photos {
+                -moz-column-count: 2;
+                -webkit-column-count: 2;
+                column-count: 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <header>
+            <nav class="navbar is-white is-right">
+
+                <div class="navbar-brand">
+
+                    <p class="p-4">👾 L I N K E R B O T</p>
+
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                        data-target="navbarBasicExample">
+                        <figure class="image is-48x48 p-2">
+                            <img class="is-rounded" src="/static/icon.jpeg" alt="Placeholder image">
+                        </figure>
+                    </a>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container is-max-desktop is-mobile">
+
+            <div class='is-content'>
+
+                {{range $i, $a := .Posts}}
+
+                <div class="card">
+
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-48x48">
+                                    <img class="is-rounded" src="./{{ $a.Metadata.Avatar }}" alt="Placeholder image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4">{{ $a.Metadata.Title }}</p>
+                                <p class="subtitle is-6"><a href="{{ $a.Metadata.Group }}" target="_blank">@{{
+                                        $a.Metadata.UserName }}</a></p>
+                            </div>
+                        </div>
+                        <div class="field" id="photos">
+                            {{range $i1, $a1 := $a.Photo}}
+                            <img class="content" src="{{ $a1 }}" alt="{{ $a1 }}" />
+                            {{ end }}
+
+                            {{range $i1, $a1 := $a.Video}}
+                            <video controls="controls" autoplay loop muted preload="auto">
+                                <source src="{{ $a1 }}" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+                            </video>
+                            {{ end }}
+
+                            {{range $i1, $a1 := $a.Document}}
+
+                            {{ if $a1 | isImage }}
+                            <img class="content" src="{{ $a1 }}" alt="{{ $a1 }}" />
+                            {{ end }}
+
+                            {{ if $a1 | isVideo }}
+                            <video controls="controls" autoplay loop muted preload="auto">
+                                <source src="{{ $a1 }}" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+                            </video>
+                            {{ end }}
+
+                            {{ if $a1 | isFile }}
+                            <a href="{{ $a1 }}" target="_blank">{{ $a1 }}</a>
+                            {{ end }}
+
+                            {{ end }}
+                        </div>
+
+                        <div class="content">
+                            <div class="in-channel" style="  
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            ">{{$a.Title}}</div><br>
+                            <span class="tag is-info">{{ $a.Metadata.UserName }}</span>
+                            <span class="icon-text">
+                                <span class="icon">
+                                    <i>📍</i>
+                                </span>
+                                <span>
+                                    <a href="{{ $a.Metadata.Url }}" target="_blank">{{ $a.Metadata.Url }}</a>
+                                </span>
+                            </span>
+                            <!-- <script async src="https://telegram.org/js/telegram-widget.js?19" 
+                            data-telegram-post="{{ $a.Metadata.UserName }}/{{ $a.Metadata.MessageId }}" 
+                            data-width="100%"></script> -->
+                        </div>
+                    </div>
+
+                </div>
+
+                {{ end }}
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        $(document).ready(function () {
+
+            function urlify(text) {
+                var urlRegex = /(https?:\/\/[^\s]+)/g;
+                return text.replace(urlRegex, function (url) {
+                    return '<a href="' + url + '" target="_blank">' + url + '</a>';
+                })
+            }
+
+            content = document.querySelectorAll('.in-channel')
+            content.forEach(function (e) {
+                e.innerHTML = urlify(e.innerHTML);
+            });
+
+        })
+    </script>
+</body>
+
+</html>
