@@ -14,8 +14,43 @@ var botPic = ""
 func runBot() {
 
 	bot := skeleton.NewBot(config.Token)
+	bot.HandleFunc("/start", start).Border(skeleton.Private).Methods(skeleton.Commands)
+	bot.HandleFunc("(.*)", updateMessage).Border(skeleton.Private).Methods(skeleton.ReplyToMessages)
 	bot.HandleFunc("(.*)", saveMessage).Border(skeleton.Private).Methods(skeleton.Messages)
 	bot.Run()
+}
+
+func start(c *skeleton.Context) bool {
+
+	m := tgbotapi.NewMessage(c.ChatId(), "Привет, я сохраню твои ссылки!")
+	c.BotAPI.Send(m)
+
+	return true
+}
+
+func updateMessage(c *skeleton.Context) bool {
+
+	message := c.Update.Message
+	id := ""
+
+	// private chat
+	if message.ForwardFromChat == nil {
+		id = fmt.Sprintf("%d-%d-%d", message.ReplyToMessage.Chat.ID, message.ReplyToMessage.MessageID, message.ReplyToMessage.Date)
+	}
+
+	//  public chat
+	if message.ForwardFromChat != nil {
+		id = fmt.Sprintf("%d-%d", message.ReplyToMessage.ForwardFromChat.ID, message.ReplyToMessage.ForwardDate)
+	}
+
+	post := Posts[id]
+	post.Title += "\n" + message.Text
+	Posts[id] = post
+
+	Posts.update()
+
+	return true
+
 }
 
 func saveMessage(c *skeleton.Context) bool {
@@ -29,7 +64,8 @@ func saveMessage(c *skeleton.Context) bool {
 
 	// private chat
 	if message.ForwardFromChat == nil {
-		id = fmt.Sprintf("%d-%d", message.Chat.ID, c.Update.UpdateID)
+		// 1661281383
+		id = fmt.Sprintf("%d-%d-%d", message.Chat.ID, message.MessageID, message.Date)
 
 		chat, _ := c.BotAPI.GetChat(message.Chat.ChatConfig())
 
@@ -56,11 +92,11 @@ func saveMessage(c *skeleton.Context) bool {
 		f := download(directURL, photoID+".jpeg")
 
 		post.Metadata = Metadata{
-			Title:    message.ForwardFromChat.Title,
-			UserName: message.ForwardFromChat.UserName,
-			Avatar:   f.Name(),
-			Group:    fmt.Sprintf("https://t.me/%s", message.ForwardFromChat.UserName),
-			Url:      fmt.Sprintf("https://t.me/%s/%d", message.ForwardFromChat.UserName, message.ForwardFromMessageID),
+			Title:     message.ForwardFromChat.Title,
+			UserName:  message.ForwardFromChat.UserName,
+			Avatar:    f.Name(),
+			Group:     fmt.Sprintf("https://t.me/%s", message.ForwardFromChat.UserName),
+			Url:       fmt.Sprintf("https://t.me/%s/%d", message.ForwardFromChat.UserName, message.ForwardFromMessageID),
 			MessageId: message.ForwardFromMessageID,
 		}
 
@@ -122,4 +158,3 @@ func saveMessage(c *skeleton.Context) bool {
 
 	return true
 }
-

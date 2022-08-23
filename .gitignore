@@ -3,5 +3,6 @@
 /app.yaml
 
 __*
+.DC_Store
 *.exec
 *.exe
